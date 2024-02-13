@@ -1,7 +1,7 @@
 const { ethers } = require("hardhat");
 const { expect } = require("chai");
 
-describe("Investor Vesting", () => {
+describe("Staked VEC Vesting", () => {
     let routerAddress,
         router,
         VEC,
@@ -113,7 +113,7 @@ describe("Investor Vesting", () => {
         await staking.setDistributor(distributor.getAddress());
         await distributor.setVECRate("5000");
 
-        Vesting = await ethers.getContractFactory("InvestorVectorVest");
+        Vesting = await ethers.getContractFactory("StakedVECVesting");
         vest = await Vesting.deploy(vec.getAddress(), sVEC.getAddress(), staking.getAddress());
 
         await weth.deposit({ value: ethers.parseEther("50.0") });
