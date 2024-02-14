@@ -10,4 +10,10 @@ interface IvETH is IERC20Metadata {
         address _to,
         uint256 _amount
     ) external;
+
+    function redeem(
+        address _restakedLSTToReceive,
+        address _to,
+        uint256 _vETHToRedeem
+    ) external;
 }
