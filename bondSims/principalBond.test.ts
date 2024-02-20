@@ -21,7 +21,7 @@ describe("Test", () => {
         Bond,
         bond,
         deployer,
-        owner;
+        owner
 
     async function addTime(time) {
         await network.provider.send("evm_increaseTime", [time]);
@@ -112,7 +112,7 @@ describe("Test", () => {
             console.log(await treasury.valueOfToken(weth.getAddress(), "10000000000000000000"));
             console.log(await bond.payoutFor("10000000000000000000"));
 
-            await bond.deposit("10000000000000000000", "20000000000000000");
+            await bond.deposit("10000000000000000000", "20000000000000000", [0,0,0]);
 
             console.log(await bond.bondPrice());
         });
@@ -130,7 +130,7 @@ describe("Test", () => {
                             (await bond.bondPrice()).toString()
                     );
 
-                    await bond.deposit("10000000000000000000", "20000000000000000");
+                    await bond.deposit("10000000000000000000", "20000000000000000", [0,0,0]);
 
                     console.log(
                         "Bond Price After Bond (" +

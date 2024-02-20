@@ -110,7 +110,7 @@ describe("Test", () => {
             console.log(await treasury.valueOfToken(weth.getAddress(), "10000000000000000000"));
             console.log(await bond.payoutFor("10000000000000000000"));
 
-            await bond.deposit("10000000000000000000", "20000000000000000");
+            await bond.deposit("10000000000000000000", "20000000000000000", [0,0,0]);
 
             console.log(await bond.bondPrice());
         });
@@ -130,7 +130,8 @@ describe("Test", () => {
 
                     await bond.deposit(
                         "10000000000000000000",
-                        "20000000000000000"
+                        "20000000000000000",
+                        [0,0,0]
                     );
 
                     console.log(

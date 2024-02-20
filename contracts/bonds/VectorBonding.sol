@@ -4,6 +4,8 @@ import "../libraries/Address.sol";
 import "../libraries/SafeERC20.sol";
 import "../interface/ITreasury.sol";
 
+pragma experimental ABIEncoderV2;
+
 interface IUniswapV2Router02 {
     function addLiquidity(
         address tokenA,
@@ -104,6 +106,12 @@ contract VectorBonding {
     mapping(address => Bond) public bondInfo; // stores bond information for depositors
 
     /// STRUCTS ///
+
+    struct MinAmountsLiq {
+        uint256 minVECToSwap;
+        uint256 minVECToAdd;
+        uint256 minWETHToAdd;
+    }
 
     // Info for creating new bonds
     struct Terms {
@@ -287,7 +295,8 @@ contract VectorBonding {
      */
     function deposit(
         uint256 _amount,
-        uint256 _maxPrice
+        uint256 _maxPrice,
+        MinAmountsLiq calldata _minAmounts
     ) external returns (uint256) {
         require(
             IERC20(principalToken).balanceOf(msg.sender) >= _amount,
@@ -345,10 +354,12 @@ contract VectorBonding {
             principalToken.safeTransferFrom(msg.sender, address(this), _amount);
 
             uint256 vecBefore = VEC.balanceOf(address(this));
-            swapETHForTokens(_amount / 2);
+            swapETHForTokens(_amount / 2, _minAmounts.minVECToSwap);
             addLiquidity(
                 VEC.balanceOf(address(this)) - vecBefore,
-                principalToken.balanceOf(address(this))
+                principalToken.balanceOf(address(this)),
+                _minAmounts.minVECToAdd,
+                _minAmounts.minWETHToAdd
             );
         }
 
@@ -411,7 +422,7 @@ contract VectorBonding {
     /// INTERNAL HELPER FUNCTIONS ///
 
     /// @dev INTERNAL function to swap `ethAmount` for VEC
-    function swapETHForTokens(uint256 ethAmount) internal {
+    function swapETHForTokens(uint256 ethAmount, uint256 minVEC) internal {
         // generate the uniswap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = uniswapV2Router.WETH();
@@ -420,7 +431,7 @@ contract VectorBonding {
         // make the swap
         uniswapV2Router.swapExactTokensForTokensSupportingFeeOnTransferTokens(
             ethAmount,
-            0, // accept any amount of ETH
+            minVEC,
             path,
             address(this),
             block.timestamp
@@ -428,15 +439,15 @@ contract VectorBonding {
     }
 
     /// @dev INTERNAL function to add `tokenAmount` and `ethAmount` to LP
-    function addLiquidity(uint256 tokenAmount, uint256 ethAmount) internal {
+    function addLiquidity(uint256 tokenAmount, uint256 ethAmount, uint256 minVEC, uint256 minWETH) internal {
         // add the liquidity
         uniswapV2Router.addLiquidity(
             address(VEC),
             address(principalToken),
             tokenAmount,
             ethAmount,
-            0,
-            0,
+            minVEC,
+            minWETH,
             address(treasury),
             block.timestamp
         );
